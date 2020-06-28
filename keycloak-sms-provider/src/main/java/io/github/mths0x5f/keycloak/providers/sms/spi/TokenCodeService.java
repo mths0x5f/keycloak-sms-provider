@@ -9,5 +9,5 @@ public interface TokenCodeService extends Provider {
 
     TokenCodeRepresentation ongoingProcess(UserModel user, TokenCodeType tokenCodeType);
 
-    void persistCode(TokenCodeRepresentation verificationCode, TokenCodeType tokenCodeType);
+    void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType);
 }

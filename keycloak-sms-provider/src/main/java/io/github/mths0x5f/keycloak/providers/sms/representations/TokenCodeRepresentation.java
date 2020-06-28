@@ -26,17 +26,17 @@ public class TokenCodeRepresentation {
 
         user.setSingleAttribute("isPhoneNumberVerified", "false");
 
-        TokenCodeRepresentation verificationCode = new TokenCodeRepresentation();
+        TokenCodeRepresentation tokenCode = new TokenCodeRepresentation();
 
-        verificationCode.id = KeycloakModelUtils.generateId();
-        verificationCode.phoneNumber = user.getFirstAttribute("phoneNumber");
-        verificationCode.code = generateVerificationCode();
-        verificationCode.confirmed = false;
+        tokenCode.id = KeycloakModelUtils.generateId();
+        tokenCode.phoneNumber = user.getFirstAttribute("phoneNumber");
+        tokenCode.code = generateTokenCode();
+        tokenCode.confirmed = false;
 
-        return verificationCode;
+        return tokenCode;
     }
 
-    private static String generateVerificationCode() {
+    private static String generateTokenCode() {
         SecureRandom secureRandom = new SecureRandom();
         Integer code = secureRandom.nextInt(999_999);
         return String.format("%06d", code);
