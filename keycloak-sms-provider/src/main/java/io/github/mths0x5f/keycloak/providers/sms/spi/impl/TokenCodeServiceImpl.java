@@ -81,6 +81,15 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
+    public void validateProcess(String tokenCodeId) {
+
+        TokenCode entity = getEntityManager().find(TokenCode.class, tokenCodeId);
+        entity.setConfirmed(true);
+        getEntityManager().persist(entity);
+
+    }
+
+    @Override
     public void close() {
     }
 }
