@@ -73,7 +73,7 @@ public class VerificationCodeResource {
                 .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
                 .stream().filter(u -> !u.getId().equals(user.getId()))
                 .forEach(u -> {
-                    logger.info(String.format("User %s also has phone number %s. Un-verifying.", user.getId(), phoneNumber));
+                    logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
                     u.setSingleAttribute("isPhoneNumberVerified", "false");
                 });
 
