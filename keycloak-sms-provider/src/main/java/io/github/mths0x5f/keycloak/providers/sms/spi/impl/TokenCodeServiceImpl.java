@@ -4,6 +4,7 @@ import io.github.mths0x5f.keycloak.providers.sms.constants.TokenCodeType;
 import io.github.mths0x5f.keycloak.providers.sms.jpa.TokenCode;
 import io.github.mths0x5f.keycloak.providers.sms.representations.TokenCodeRepresentation;
 import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
+import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -12,11 +13,14 @@ import org.keycloak.models.UserModel;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TemporalType;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 import java.time.Instant;
 import java.util.Date;
 
 public class TokenCodeServiceImpl implements TokenCodeService {
 
+    private static final Logger logger = Logger.getLogger(TokenCodeServiceImpl.class);
     private final KeycloakSession session;
 
     TokenCodeServiceImpl(KeycloakSession session) {
@@ -81,12 +85,32 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
-    public void validateProcess(String tokenCodeId) {
+    public void validateCode(UserModel user, String code) {
 
+        TokenCodeRepresentation tokenCode = ongoingProcess(user, TokenCodeType.VERIFY_PHONE_NUMBER);
+        if (tokenCode == null) throw new BadRequestException("There is no valid ongoing verification process");
+
+        if (!tokenCode.getCode().equals(code)) throw new ForbiddenException("Code does not match with expected value");
+        String phoneNumber = user.getFirstAttribute("phoneNumber");
+
+        logger.info(String.format("User %s correctly answered the verification code", user.getId()));
+        session.users()
+                .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
+                .stream().filter(u -> !u.getId().equals(user.getId()))
+                .forEach(u -> {
+                    logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
+                    u.setSingleAttribute("isPhoneNumberVerified", "false");
+                });
+
+        user.setSingleAttribute("isPhoneNumberVerified", "true");
+        validateProcess(tokenCode.getId());
+    }
+
+    @Override
+    public void validateProcess(String tokenCodeId) {
         TokenCode entity = getEntityManager().find(TokenCode.class, tokenCodeId);
         entity.setConfirmed(true);
         getEntityManager().persist(entity);
-
     }
 
     @Override

@@ -11,5 +11,7 @@ public interface TokenCodeService extends Provider {
 
     void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType);
 
+    void validateCode(UserModel user, String code);
+
     void validateProcess(String tokenCodeId);
 }

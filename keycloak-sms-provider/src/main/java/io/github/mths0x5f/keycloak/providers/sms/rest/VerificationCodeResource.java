@@ -1,7 +1,5 @@
 package io.github.mths0x5f.keycloak.providers.sms.rest;
 
-import io.github.mths0x5f.keycloak.providers.sms.constants.TokenCodeType;
-import io.github.mths0x5f.keycloak.providers.sms.representations.TokenCodeRepresentation;
 import io.github.mths0x5f.keycloak.providers.sms.spi.PhoneMessageService;
 import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import org.jboss.logging.Logger;
@@ -59,26 +57,10 @@ public class VerificationCodeResource {
         if (auth == null) throw new NotAuthorizedException("Bearer");
 
         UserModel user = auth.getUser();
-
         String phoneNumber = user.getFirstAttribute("phoneNumber");
         if (phoneNumber == null) throw new BadRequestException("User does not have a phone number attribute");
 
-        TokenCodeRepresentation tokenCode = getTokenCodeService().ongoingProcess(user, TokenCodeType.VERIFY_PHONE_NUMBER);
-        if (tokenCode == null) throw new BadRequestException("There is no valid ongoing verification process");
-
-        if (!tokenCode.getCode().equals(code)) throw new ForbiddenException("Code does not match with expected value");
-
-        logger.info(String.format("User %s correctly answered the verification code", user.getId()));
-        session.users()
-                .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
-                .stream().filter(u -> !u.getId().equals(user.getId()))
-                .forEach(u -> {
-                    logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
-                    u.setSingleAttribute("isPhoneNumberVerified", "false");
-                });
-
-        user.setSingleAttribute("isPhoneNumberVerified", "true");
-        getTokenCodeService().validateProcess(tokenCode.getId());
+        getTokenCodeService().validateCode(user, code);
 
         return Response.noContent().build();
     }
