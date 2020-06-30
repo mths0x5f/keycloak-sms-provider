@@ -39,7 +39,7 @@
                   <version>${project.version}</version>
                 </artifactItem>
               </artifactItems>
-              <outputDirectory>../build/modules/${project.artifactId}</outputDirectory>
+              <outputDirectory>../build/modules/${project.artifactId}/main</outputDirectory>
               <stripClassifier>true</stripClassifier>
               <stripVersion>true</stripVersion>
             </configuration>
