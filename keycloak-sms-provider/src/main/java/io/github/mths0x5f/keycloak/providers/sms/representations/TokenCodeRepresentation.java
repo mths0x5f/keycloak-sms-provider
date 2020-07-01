@@ -3,7 +3,6 @@ package io.github.mths0x5f.keycloak.providers.sms.representations;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 import java.security.SecureRandom;
@@ -22,14 +21,12 @@ public class TokenCodeRepresentation {
     private Date expiresAt;
     private Boolean confirmed;
 
-    public static TokenCodeRepresentation forUser(UserModel user) {
-
-        user.setSingleAttribute("isPhoneNumberVerified", "false");
+    public static TokenCodeRepresentation forPhoneNumber(String phoneNumber) {
 
         TokenCodeRepresentation tokenCode = new TokenCodeRepresentation();
 
         tokenCode.id = KeycloakModelUtils.generateId();
-        tokenCode.phoneNumber = user.getFirstAttribute("phoneNumber");
+        tokenCode.phoneNumber = phoneNumber;
         tokenCode.code = generateTokenCode();
         tokenCode.confirmed = false;
 

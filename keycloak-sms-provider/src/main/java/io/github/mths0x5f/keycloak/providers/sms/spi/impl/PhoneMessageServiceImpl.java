@@ -9,28 +9,28 @@ import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.UserModel;
 
 import javax.ws.rs.ServiceUnavailableException;
+import java.time.Instant;
 
 public class PhoneMessageServiceImpl implements PhoneMessageService {
 
     private static final Logger logger = Logger.getLogger(PhoneMessageServiceImpl.class);
     private final KeycloakSession session;
     private final String realmName;
-    private final Scope config;
     private final String service;
+    private final int tokenExpiresIn;
 
     PhoneMessageServiceImpl(KeycloakSession session, Scope config) {
         this.session = session;
         this.realmName = session.getContext().getRealm().getName();
-        this.config = config;
         this.service = session.listProviderIds(MessageSenderService.class)
                 .stream().filter(s -> s.equals(config.get("service")))
                 .findFirst().orElse(
                         session.listProviderIds(MessageSenderService.class)
-                                .stream().findFirst().get()
+                                .stream().findFirst().orElse("")
                 );
+        this.tokenExpiresIn = config.getInt("tokenExpiresIn", 60);
     }
 
     @Override
@@ -42,25 +42,23 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
     }
 
     @Override
-    public void sendVerificationCode(UserModel user) {
+    public int sendVerificationCode(String phoneNumber) {
 
-        String phoneNumber = user.getFirstAttribute("phoneNumber");
-
-        if (getTokenCodeService().ongoingProcess(user, TokenCodeType.VERIFY_PHONE_NUMBER) != null) {
+        TokenCodeRepresentation ongoing = getTokenCodeService().ongoingProcess(phoneNumber, TokenCodeType.VERIFY_PHONE_NUMBER);
+        if (ongoing != null) {
             logger.info(String.format("No need of sending a new verification code for %s", phoneNumber));
-            return;
+            return (int) (ongoing.getExpiresAt().getTime() - Instant.now().toEpochMilli()) / 1000;
         }
 
-        TokenCodeRepresentation token = TokenCodeRepresentation.forUser(user);
+        TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber);
         final String MESSAGE = String.format("%s - verification code: %s", realmName, token.getCode());
 
         try {
 
             session.getProvider(MessageSenderService.class, service).sendMessage(phoneNumber, MESSAGE);
-            getTokenCodeService().persistCode(token, TokenCodeType.VERIFY_PHONE_NUMBER);
+            getTokenCodeService().persistCode(token, TokenCodeType.VERIFY_PHONE_NUMBER, tokenExpiresIn);
 
-            logger.info(String.format("Sent verification code to %s over %s for user %s",
-                    phoneNumber, service, user.getId()));
+            logger.info(String.format("Sent verification code to %s over %s", phoneNumber, service));
 
         } catch (MessageSendException e) {
 
@@ -68,28 +66,28 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
                     phoneNumber, e.getErrorCode(), e.getErrorMessage()));
             throw new ServiceUnavailableException();
         }
+
+        return tokenExpiresIn;
     }
 
     @Override
-    public void sendAuthenticationCode(UserModel user) {
+    public int sendAuthenticationCode(String phoneNumber) {
 
-        String phoneNumber = user.getFirstAttribute("phoneNumber");
-
-        if (getTokenCodeService().ongoingProcess(user, TokenCodeType.OTP_MESSAGE) != null) {
+        TokenCodeRepresentation ongoing = getTokenCodeService().ongoingProcess(phoneNumber, TokenCodeType.OTP_MESSAGE);
+        if (ongoing != null) {
             logger.info(String.format("No need of sending a new OTP code for %s", phoneNumber));
-            return;
+            return (int) (ongoing.getExpiresAt().getTime() - Instant.now().toEpochMilli()) / 1000;
         }
 
-        TokenCodeRepresentation token = TokenCodeRepresentation.forUser(user);
+        TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber);
         final String MESSAGE = String.format("%s - authentication code: %s", realmName, token.getCode());
 
         try {
 
             session.getProvider(MessageSenderService.class, service).sendMessage(phoneNumber, MESSAGE);
-            getTokenCodeService().persistCode(token, TokenCodeType.OTP_MESSAGE);
+            getTokenCodeService().persistCode(token, TokenCodeType.OTP_MESSAGE, tokenExpiresIn);
 
-            logger.info(String.format("Sent OTP code to %s over %s for user %s",
-                    phoneNumber, service, user.getId()));
+            logger.info(String.format("Sent OTP code to %s over %s", phoneNumber, service));
 
         } catch (MessageSendException e) {
 
@@ -97,5 +95,7 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
                     phoneNumber, e.getErrorCode(), e.getErrorMessage()));
             throw new ServiceUnavailableException();
         }
+
+        return tokenExpiresIn;
     }
 }

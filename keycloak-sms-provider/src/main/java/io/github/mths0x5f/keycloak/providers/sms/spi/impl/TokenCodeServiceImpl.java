@@ -4,6 +4,7 @@ import io.github.mths0x5f.keycloak.providers.sms.constants.TokenCodeType;
 import io.github.mths0x5f.keycloak.providers.sms.jpa.TokenCode;
 import io.github.mths0x5f.keycloak.providers.sms.representations.TokenCodeRepresentation;
 import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
+import io.github.mths0x5f.keycloak.requiredactions.sms.UpdatePhoneNumberRequiredAction;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
@@ -39,13 +40,13 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
-    public TokenCodeRepresentation ongoingProcess(UserModel user, TokenCodeType tokenCodeType) {
+    public TokenCodeRepresentation ongoingProcess(String phoneNumber, TokenCodeType tokenCodeType) {
 
         try {
             TokenCode entity = getEntityManager()
                     .createNamedQuery("ongoingProcess", TokenCode.class)
                     .setParameter("realmId", getRealm().getId())
-                    .setParameter("phoneNumber", user.getFirstAttribute("phoneNumber"))
+                    .setParameter("phoneNumber", phoneNumber)
                     .setParameter("now", new Date(), TemporalType.TIMESTAMP)
                     .setParameter("type", tokenCodeType.name())
                     .getSingleResult();
@@ -67,7 +68,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
-    public void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType) {
+    public void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, int tokenExpiresIn) {
 
         TokenCode entity = new TokenCode();
         Instant now = Instant.now();
@@ -78,20 +79,19 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         entity.setCode(tokenCode.getCode());
         entity.setType(tokenCodeType.name());
         entity.setCreatedAt(Date.from(now));
-        entity.setExpiresAt(Date.from(now.plusSeconds(60 * 5)));
+        entity.setExpiresAt(Date.from(now.plusSeconds(tokenExpiresIn)));
         entity.setConfirmed(tokenCode.getConfirmed());
 
         getEntityManager().persist(entity);
     }
 
     @Override
-    public void validateCode(UserModel user, String code) {
+    public void validateCode(UserModel user, String phoneNumber, String code) {
 
-        TokenCodeRepresentation tokenCode = ongoingProcess(user, TokenCodeType.VERIFY_PHONE_NUMBER);
+        TokenCodeRepresentation tokenCode = ongoingProcess(phoneNumber, TokenCodeType.VERIFY_PHONE_NUMBER);
         if (tokenCode == null) throw new BadRequestException("There is no valid ongoing verification process");
 
         if (!tokenCode.getCode().equals(code)) throw new ForbiddenException("Code does not match with expected value");
-        String phoneNumber = user.getFirstAttribute("phoneNumber");
 
         logger.info(String.format("User %s correctly answered the verification code", user.getId()));
         session.users()
@@ -103,6 +103,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
                 });
 
         user.setSingleAttribute("isPhoneNumberVerified", "true");
+        user.setSingleAttribute("phoneNumber", phoneNumber);
+        user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
         validateProcess(tokenCode.getId());
     }
 

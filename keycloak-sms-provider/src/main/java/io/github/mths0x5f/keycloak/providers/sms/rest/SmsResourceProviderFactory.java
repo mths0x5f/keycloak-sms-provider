@@ -8,18 +8,18 @@ import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 
-public class UserResourceProviderFactory implements RealmResourceProviderFactory {
+public class SmsResourceProviderFactory implements RealmResourceProviderFactory {
 
-    private static final Logger logger = Logger.getLogger(UserResourceProviderFactory.class);
+    private static final Logger logger = Logger.getLogger(SmsResourceProviderFactory.class);
 
     @Override
     public String getId() {
-        return "users";
+        return "sms";
     }
 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        return new UserResourceProvider(session);
+        return new SmsResourceProvider(session);
     }
 
     @Override

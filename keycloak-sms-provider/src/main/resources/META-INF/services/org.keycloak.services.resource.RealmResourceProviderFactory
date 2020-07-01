@@ -1,1 +1,1 @@
-io.github.mths0x5f.keycloak.providers.sms.rest.UserResourceProviderFactory
+io.github.mths0x5f.keycloak.providers.sms.rest.SmsResourceProviderFactory

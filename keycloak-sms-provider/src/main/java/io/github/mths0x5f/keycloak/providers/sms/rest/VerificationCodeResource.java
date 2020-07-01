@@ -13,6 +13,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class VerificationCodeResource {
 
@@ -31,36 +32,33 @@ public class VerificationCodeResource {
 
     @GET
     @NoCache
-    @Path("verification-code")
+    @Path("")
     @Produces(APPLICATION_JSON)
-    public Response getVerificationCode() {
+    public Response getVerificationCode(@QueryParam("phoneNumber") String phoneNumber) {
 
-        if (auth == null) throw new NotAuthorizedException("Bearer");
+        if (phoneNumber == null) throw new BadRequestException("Must inform a phone number");
 
-        UserModel user = auth.getUser();
+        logger.info(String.format("Requested verification code to %s", phoneNumber));
+        int tokenExpiresIn = session.getProvider(PhoneMessageService.class).sendVerificationCode(phoneNumber);
 
-        String phoneNumber = user.getFirstAttribute("phoneNumber");
-        if (phoneNumber == null) throw new BadRequestException("User does not have a phone number attribute");
+        String response = String.format("{\"expiresIn\":%s}", tokenExpiresIn);
 
-        logger.info(String.format("Requested verification code to %s for user of id %s", phoneNumber, user.getId()));
-        session.getProvider(PhoneMessageService.class).sendVerificationCode(user);
-
-        return Response.noContent().build();
+        return Response.ok(response, APPLICATION_JSON_TYPE).build();
     }
 
     @POST
     @NoCache
-    @Path("verification-code")
+    @Path("")
     @Produces(APPLICATION_JSON)
-    public Response checkVerificationCode(@QueryParam("code") String code) {
+    public Response checkVerificationCode(@QueryParam("phoneNumber") String phoneNumber,
+                                          @QueryParam("code") String code) {
 
         if (auth == null) throw new NotAuthorizedException("Bearer");
+        if (phoneNumber == null) throw new BadRequestException("Must inform a phone number");
+        if (code == null) throw new BadRequestException("Must inform a token code");
 
         UserModel user = auth.getUser();
-        String phoneNumber = user.getFirstAttribute("phoneNumber");
-        if (phoneNumber == null) throw new BadRequestException("User does not have a phone number attribute");
-
-        getTokenCodeService().validateCode(user, code);
+        getTokenCodeService().validateCode(user, phoneNumber, code);
 
         return Response.noContent().build();
     }
