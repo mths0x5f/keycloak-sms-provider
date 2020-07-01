@@ -9,7 +9,6 @@ This is what you can do:
   + Check ownership of a phone number
   + Use SMS as second factor in 2FA method
   + Use SMS-Token pair as credentials for the login
-  + Use SMS to reset password
   
 ## Compatibility
 
