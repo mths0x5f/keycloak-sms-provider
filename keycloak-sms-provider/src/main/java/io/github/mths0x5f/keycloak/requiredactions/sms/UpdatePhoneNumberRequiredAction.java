@@ -18,9 +18,7 @@ public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
-        String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
         Response challenge = context.form()
-                .setAttribute("phoneNumber", phoneNumber)
                 .createForm("login-update-phone-number.ftl");
         context.challenge(challenge);
     }
