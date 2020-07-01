@@ -18,6 +18,7 @@
 
     <modules>
         <module>keycloak-sms-provider</module>
+        <module>keycloak-sms-provider.resources</module>
         <module>keycloak-sms-provider-dummy</module>
         <module>keycloak-sms-provider-totalvoice</module>
         <module>keycloak-sms-provider-twilio</module>
