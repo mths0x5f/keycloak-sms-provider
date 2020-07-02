@@ -12,7 +12,7 @@ public class ConfigSmsOtpRequiredActionFactory implements RequiredActionFactory 
 
     @Override
     public String getDisplayText() {
-        return "Configure SMS 2FA";
+        return "Configure OTP over SMS";
     }
 
     @Override

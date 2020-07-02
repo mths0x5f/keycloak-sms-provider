@@ -96,7 +96,7 @@ public class SmsOtpAuthenticator implements Authenticator, CredentialValidator<S
         boolean validated = validateAnswer(context);
         if (!validated) {
             Response challenge = context.form()
-                    .setError("badSecret")
+                    .setError("authenticationCodeDoesNotMatch")
                     .createForm("login-sms-otp.ftl");
             context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, challenge);
             return;
