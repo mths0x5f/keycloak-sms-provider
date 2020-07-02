@@ -16,4 +16,9 @@ public class SmsResource {
     public VerificationCodeResource getVerificationCodeResource() {
         return new VerificationCodeResource(session);
     }
+
+    @Path("authentication-code")
+    public AuthenticationCodeResource getAuthenticationCodeResource() {
+        return new AuthenticationCodeResource(session);
+    }
 }
