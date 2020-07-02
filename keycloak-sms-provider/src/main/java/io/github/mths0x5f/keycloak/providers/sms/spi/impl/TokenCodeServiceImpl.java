@@ -1,5 +1,8 @@
 package io.github.mths0x5f.keycloak.providers.sms.spi.impl;
 
+import io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpCredentialProvider;
+import io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpCredentialProviderFactory;
+import io.github.mths0x5f.keycloak.authenticators.sms.credential.SmsOtpCredentialModel;
 import io.github.mths0x5f.keycloak.providers.sms.constants.TokenCodeType;
 import io.github.mths0x5f.keycloak.providers.sms.jpa.TokenCode;
 import io.github.mths0x5f.keycloak.providers.sms.representations.TokenCodeRepresentation;
@@ -7,6 +10,7 @@ import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import io.github.mths0x5f.keycloak.requiredactions.sms.UpdatePhoneNumberRequiredAction;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.credential.CredentialProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -113,6 +117,12 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         user.setSingleAttribute("isPhoneNumberVerified", "true");
         user.setSingleAttribute("phoneNumber", phoneNumber);
         user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
+
+        SmsOtpCredentialProvider socp = (SmsOtpCredentialProvider) session.getProvider(CredentialProvider.class, SmsOtpCredentialProviderFactory.PROVIDER_ID);
+        if (socp.isConfiguredFor(getRealm(), user, SmsOtpCredentialModel.TYPE)) {
+            session.userCredentialManager().updateCredential(getRealm(), user, SmsOtpCredentialModel.create(phoneNumber));
+        }
+
         validateProcess(tokenCode.getId());
     }
 
