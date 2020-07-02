@@ -1,10 +1,12 @@
 package io.github.mths0x5f.keycloak.requiredactions.sms;
 
 import io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpCredentialProvider;
+import io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpCredentialProviderFactory;
 import io.github.mths0x5f.keycloak.authenticators.sms.credential.SmsOtpCredentialModel;
 import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
+import org.keycloak.credential.CredentialProvider;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -32,7 +34,8 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
         String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
         try {
             tokenCodeService.validateCode(context.getUser(), phoneNumber, code);
-            SmsOtpCredentialProvider socp = context.getSession().getProvider(SmsOtpCredentialProvider.class);
+            SmsOtpCredentialProvider socp = (SmsOtpCredentialProvider) context.getSession()
+                    .getProvider(CredentialProvider.class, SmsOtpCredentialProviderFactory.PROVIDER_ID);
             socp.createCredential(context.getRealm(), context.getUser(), SmsOtpCredentialModel.create(phoneNumber));
             context.success();
         } catch (BadRequestException e) {
