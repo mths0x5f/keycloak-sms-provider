@@ -1,0 +1,2 @@
+io.github.mths0x5f.keycloak.requiredactions.sms.UpdatePhoneNumberRequiredActionFactory
+io.github.mths0x5f.keycloak.requiredactions.sms.ConfigSmsOtpRequiredActionFactory
