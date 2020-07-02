@@ -3,6 +3,7 @@ package io.github.mths0x5f.keycloak.requiredactions.sms;
 import io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpCredentialProvider;
 import io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpCredentialProviderFactory;
 import io.github.mths0x5f.keycloak.authenticators.sms.credential.SmsOtpCredentialModel;
+import io.github.mths0x5f.keycloak.providers.sms.spi.PhoneMessageService;
 import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
@@ -22,9 +23,10 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        PhoneMessageService phoneMessageService = context.getSession().getProvider(PhoneMessageService.class);
         String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
+        phoneMessageService.sendAuthenticationCode(phoneNumber);
         Response challenge = context.form()
-                .setAttribute("phoneNumber", phoneNumber)
                 .createForm("login-sms-otp-config.ftl");
         context.challenge(challenge);
     }
