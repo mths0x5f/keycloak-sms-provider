@@ -1,12 +1,12 @@
 package io.github.mths0x5f.keycloak.authenticators.sms.credential;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.keycloak.common.util.Time;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.util.JsonSerialization;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 
 @Getter
@@ -68,7 +68,8 @@ public class SmsOtpCredentialModel extends CredentialModel {
         private final String phoneNumber;
 
         @JsonCreator
-        SmsOtpCredentialData(@JsonProperty String phoneNumber) {
+        @ConstructorProperties("phoneNumber")
+        SmsOtpCredentialData(String phoneNumber) {
             this.phoneNumber = phoneNumber;
         }
     }

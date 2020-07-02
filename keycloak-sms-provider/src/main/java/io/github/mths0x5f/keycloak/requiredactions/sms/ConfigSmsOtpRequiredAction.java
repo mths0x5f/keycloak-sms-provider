@@ -23,9 +23,6 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
-        PhoneMessageService phoneMessageService = context.getSession().getProvider(PhoneMessageService.class);
-        String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
-        phoneMessageService.sendAuthenticationCode(phoneNumber);
         Response challenge = context.form()
                 .createForm("login-sms-otp-config.ftl");
         context.challenge(challenge);

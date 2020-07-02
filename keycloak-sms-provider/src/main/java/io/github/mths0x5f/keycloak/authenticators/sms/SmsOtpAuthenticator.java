@@ -1,5 +1,6 @@
 package io.github.mths0x5f.keycloak.authenticators.sms;
 
+import io.github.mths0x5f.keycloak.providers.sms.spi.PhoneMessageService;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -77,6 +78,9 @@ public class SmsOtpAuthenticator implements Authenticator, CredentialValidator<S
             context.success();
             return;
         }
+        PhoneMessageService phoneMessageService = context.getSession().getProvider(PhoneMessageService.class);
+        String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
+        phoneMessageService.sendAuthenticationCode(phoneNumber);
         Response challenge = context.form().createForm("login-sms-otp.ftl");
         context.challenge(challenge);
     }
