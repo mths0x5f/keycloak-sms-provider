@@ -22,7 +22,9 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
+        String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
         Response challenge = context.form()
+                .setAttribute("phoneNumber", phoneNumber)
                 .createForm("login-sms-otp-config.ftl");
         context.challenge(challenge);
     }
