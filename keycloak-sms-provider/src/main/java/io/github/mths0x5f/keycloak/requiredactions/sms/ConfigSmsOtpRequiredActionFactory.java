@@ -8,7 +8,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 
 public class ConfigSmsOtpRequiredActionFactory implements RequiredActionFactory {
 
-    private static final UpdatePhoneNumberRequiredAction instance = new UpdatePhoneNumberRequiredAction();
+    private static final ConfigSmsOtpRequiredAction instance = new ConfigSmsOtpRequiredAction();
 
     @Override
     public String getDisplayText() {
@@ -34,6 +34,6 @@ public class ConfigSmsOtpRequiredActionFactory implements RequiredActionFactory 
 
     @Override
     public String getId() {
-        return UpdatePhoneNumberRequiredAction.PROVIDER_ID;
+        return ConfigSmsOtpRequiredAction.PROVIDER_ID;
     }
 }
