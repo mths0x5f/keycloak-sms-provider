@@ -1,5 +1,5 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayInfo=false displayWide=false; section>
+<@layout.registrationLayout displayInfo=true displayWide=false; section>
     <#if section = "header">
         ${msg("configSms2Fa")}
     <#elseif section = "form">
@@ -97,5 +97,7 @@
           req('${phoneNumber}');
           </#if>
       </script>
+    <#elseif section = "info">
+        ${msg("configSms2FaInfo")}
     </#if>
 </@layout.registrationLayout>
