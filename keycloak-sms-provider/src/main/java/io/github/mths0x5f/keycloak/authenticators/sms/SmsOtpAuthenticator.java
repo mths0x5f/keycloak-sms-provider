@@ -10,6 +10,7 @@ import org.keycloak.common.util.ServerCookie;
 import org.keycloak.credential.CredentialProvider;
 import org.keycloak.models.*;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
@@ -80,8 +81,13 @@ public class SmsOtpAuthenticator implements Authenticator, CredentialValidator<S
         }
         PhoneMessageService phoneMessageService = context.getSession().getProvider(PhoneMessageService.class);
         String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
-        phoneMessageService.sendAuthenticationCode(phoneNumber);
-        Response challenge = context.form().createForm("login-sms-otp.ftl");
+        Response challenge;
+        try {
+            phoneMessageService.sendAuthenticationCode(phoneNumber);
+            challenge = context.form().createForm("login-sms-otp.ftl");
+        } catch (ForbiddenException e) {
+            challenge = context.form().setError("abusedMessageService").createForm("login-sms-otp.ftl");
+        }
         context.challenge(challenge);
     }
 

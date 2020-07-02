@@ -15,6 +15,12 @@ import java.util.Date;
                         "AND t.phoneNumber = :phoneNumber " +
                         "AND t.expiresAt >= :now AND t.type = :type"
         ),
+        @NamedQuery(
+                name = "processesSince",
+                query = "FROM TokenCode t WHERE t.realmId = :realmId " +
+                        "AND t.phoneNumber = :phoneNumber " +
+                        "AND t.createdAt >= :date AND t.type = :type"
+        ),
 })
 public class TokenCode {
 

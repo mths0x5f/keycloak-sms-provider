@@ -10,6 +10,7 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.ServiceUnavailableException;
 import java.time.Instant;
 
@@ -44,6 +45,10 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
     @Override
     public int sendVerificationCode(String phoneNumber) {
 
+        if (getTokenCodeService().isAbusing(phoneNumber, TokenCodeType.VERIFY_PHONE_NUMBER)) {
+            throw new ForbiddenException("You requested the maximum number of messages the last hour");
+        }
+
         TokenCodeRepresentation ongoing = getTokenCodeService().ongoingProcess(phoneNumber, TokenCodeType.VERIFY_PHONE_NUMBER);
         if (ongoing != null) {
             logger.info(String.format("No need of sending a new verification code for %s", phoneNumber));
@@ -64,7 +69,7 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
 
             logger.error(String.format("Message sending to %s failed with %s: %s",
                     phoneNumber, e.getErrorCode(), e.getErrorMessage()));
-            throw new ServiceUnavailableException();
+            throw new ServiceUnavailableException("Internal server error");
         }
 
         return tokenExpiresIn;
@@ -72,6 +77,10 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
 
     @Override
     public int sendAuthenticationCode(String phoneNumber) {
+
+        if (getTokenCodeService().isAbusing(phoneNumber, TokenCodeType.OTP_MESSAGE)) {
+            throw new ForbiddenException("You requested the maximum number of messages the last hour");
+        }
 
         TokenCodeRepresentation ongoing = getTokenCodeService().ongoingProcess(phoneNumber, TokenCodeType.OTP_MESSAGE);
         if (ongoing != null) {
@@ -93,7 +102,7 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
 
             logger.error(String.format("Message sending to %s failed with %s: %s",
                     phoneNumber, e.getErrorCode(), e.getErrorMessage()));
-            throw new ServiceUnavailableException();
+            throw new ServiceUnavailableException("Internal server error");
         }
 
         return tokenExpiresIn;

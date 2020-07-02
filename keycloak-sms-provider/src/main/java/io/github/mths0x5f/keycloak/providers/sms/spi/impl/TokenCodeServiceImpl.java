@@ -10,6 +10,7 @@ import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import io.github.mths0x5f.keycloak.requiredactions.sms.UpdatePhoneNumberRequiredAction;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.CredentialProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -22,6 +23,8 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class TokenCodeServiceImpl implements TokenCodeService {
 
@@ -72,6 +75,22 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
+    public boolean isAbusing(String phoneNumber, TokenCodeType tokenCodeType) {
+
+        Date oneHourAgo = new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1));
+
+        List<TokenCode> entities = getEntityManager()
+                .createNamedQuery("processesSince", TokenCode.class)
+                .setParameter("realmId", getRealm().getId())
+                .setParameter("phoneNumber", phoneNumber)
+                .setParameter("date", oneHourAgo, TemporalType.TIMESTAMP)
+                .setParameter("type", tokenCodeType.name())
+                .getResultList();
+
+        return entities.size() > 3;
+    }
+
+    @Override
     public void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, int tokenExpiresIn) {
 
         TokenCode entity = new TokenCode();
@@ -116,14 +135,9 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
         user.setSingleAttribute("isPhoneNumberVerified", "true");
         user.setSingleAttribute("phoneNumber", phoneNumber);
-        user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
-
-        SmsOtpCredentialProvider socp = (SmsOtpCredentialProvider) session.getProvider(CredentialProvider.class, SmsOtpCredentialProviderFactory.PROVIDER_ID);
-        if (socp.isConfiguredFor(getRealm(), user, SmsOtpCredentialModel.TYPE)) {
-            session.userCredentialManager().updateCredential(getRealm(), user, SmsOtpCredentialModel.create(phoneNumber));
-        }
-
         validateProcess(tokenCode.getId());
+
+        cleanUpAction(user);
     }
 
     @Override
@@ -131,6 +145,20 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         TokenCode entity = getEntityManager().find(TokenCode.class, tokenCodeId);
         entity.setConfirmed(true);
         getEntityManager().persist(entity);
+    }
+
+    @Override
+    public void cleanUpAction(UserModel user) {
+        user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
+        SmsOtpCredentialProvider socp = (SmsOtpCredentialProvider)
+                session.getProvider(CredentialProvider.class, SmsOtpCredentialProviderFactory.PROVIDER_ID);
+        if (socp.isConfiguredFor(getRealm(), user, SmsOtpCredentialModel.TYPE)) {
+            CredentialModel credential = session.userCredentialManager()
+                    .getStoredCredentialsByType(getRealm(), user, SmsOtpCredentialModel.TYPE).get(0);
+            credential.setCredentialData("{\"phoneNumber\":\"" + user.getFirstAttribute("phoneNumber") + "\"}");
+            SmsOtpCredentialModel credentialModel = SmsOtpCredentialModel.createFromCredentialModel(credential);
+            session.userCredentialManager().updateCredential(getRealm(), user, credentialModel);
+        }
     }
 
     @Override

@@ -9,6 +9,8 @@ public interface TokenCodeService extends Provider {
 
     TokenCodeRepresentation ongoingProcess(String phoneNumber, TokenCodeType tokenCodeType);
 
+    boolean isAbusing(String phoneNumber, TokenCodeType tokenCodeType);
+
     void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, int tokenExpiresIn);
 
     void validateCode(UserModel user, String phoneNumber, String code);
@@ -16,4 +18,6 @@ public interface TokenCodeService extends Provider {
     void validateCode(UserModel user, String phoneNumber, String code, TokenCodeType tokenCodeType);
 
     void validateProcess(String tokenCodeId);
+
+    void cleanUpAction(UserModel user);
 }
