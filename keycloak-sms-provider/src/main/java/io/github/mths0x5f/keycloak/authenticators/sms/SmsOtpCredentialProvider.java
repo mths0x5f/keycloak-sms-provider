@@ -2,7 +2,6 @@ package io.github.mths0x5f.keycloak.authenticators.sms;
 
 import io.github.mths0x5f.keycloak.authenticators.sms.credential.SmsOtpCredentialModel;
 import io.github.mths0x5f.keycloak.providers.sms.constants.TokenCodeType;
-import io.github.mths0x5f.keycloak.providers.sms.spi.PhoneMessageService;
 import io.github.mths0x5f.keycloak.providers.sms.spi.TokenCodeService;
 import org.jboss.logging.Logger;
 import org.keycloak.common.util.Time;
@@ -89,7 +88,7 @@ public class SmsOtpCredentialProvider implements CredentialProvider<SmsOtpCreden
                 .helpText("")
                 .category(CredentialTypeMetadata.Category.TWO_FACTOR)
                 .displayName(SmsOtpCredentialProviderFactory.PROVIDER_ID)
-                .createAction(SmsOtpAuthenticatorFactory.PROVIDER_ID)
+                .createAction(SmsOtpMfaAuthenticatorFactory.PROVIDER_ID)
                 .removeable(true)
                 .build(session);
     }

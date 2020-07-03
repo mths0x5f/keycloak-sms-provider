@@ -12,10 +12,10 @@ import org.keycloak.provider.ProviderConfigProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SmsOtpAuthenticatorFactory implements AuthenticatorFactory, ConfigurableAuthenticatorFactory {
+public class SmsOtpMfaAuthenticatorFactory implements AuthenticatorFactory, ConfigurableAuthenticatorFactory {
 
     public final static String PROVIDER_ID = "sms-otp-authenticator";
-    private final static SmsOtpAuthenticator instance = new SmsOtpAuthenticator();
+    private final static SmsOtpMfaAuthenticator instance = new SmsOtpMfaAuthenticator();
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {

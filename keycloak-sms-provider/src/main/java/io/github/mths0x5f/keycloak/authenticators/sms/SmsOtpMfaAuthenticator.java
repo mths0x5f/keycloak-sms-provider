@@ -17,7 +17,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 
-public class SmsOtpAuthenticator implements Authenticator, CredentialValidator<SmsOtpCredentialProvider> {
+public class SmsOtpMfaAuthenticator implements Authenticator, CredentialValidator<SmsOtpCredentialProvider> {
 
     protected boolean hasCookie(AuthenticationFlowContext context) {
         Cookie cookie = context.getHttpRequest()

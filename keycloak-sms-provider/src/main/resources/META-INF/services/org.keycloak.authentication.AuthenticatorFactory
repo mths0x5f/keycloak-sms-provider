@@ -1,1 +1,1 @@
-io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpAuthenticatorFactory
+io.github.mths0x5f.keycloak.authenticators.sms.SmsOtpMfaAuthenticatorFactory
