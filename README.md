@@ -34,7 +34,7 @@ directory will contain all jars correctly placed in a WildFly-like folder struct
   3. Start Keycloak.
   4. Now in Authentication page, copy the browser flow and add a subflow to the forms, then adding `OTP Over SMS` as a
   new execution. Don't forget to bind this flow copy as the de facto browser flow.
-  5. Finally, register the required action `Configure OTP over SMS` in the Required Actions tab.
+  5. Finally, register the required actions `Update Phone Number` and `Configure OTP over SMS` in the Required Actions tab.
 
 i. add modules defs
 ```xml
@@ -58,6 +58,11 @@ ii. set provider and token expiration time
     </provider>
 </spi>
 ```
+
+**About the API endpoints:** You'll get 2 extra endpoints that are useful to do the verification from a custom application.
+
+  + GET /auth/realms/{realmName}/sms/verification-code?phoneNumber=+5534990001234 (To request a number verification. No auth required.)
+  + POST /auth/realms/{realmName}/sms/verification-code?phoneNumber=+5534990001234&code=123456 (To verify the process. User must be authenticated.)
 
 ## Thanks
 Some code written is based on existing ones in these two projects: [keycloak-phone-authenticator](https://github.com/FX-HAO/keycloak-phone-authenticator)
