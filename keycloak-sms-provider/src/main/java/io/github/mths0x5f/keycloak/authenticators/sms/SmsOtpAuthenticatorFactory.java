@@ -16,12 +16,6 @@ public class SmsOtpAuthenticatorFactory implements AuthenticatorFactory, Configu
 
     public final static String PROVIDER_ID = "sms-otp-authenticator";
     private final static SmsOtpAuthenticator instance = new SmsOtpAuthenticator();
-    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.REQUIRED,
-            AuthenticationExecutionModel.Requirement.ALTERNATIVE,
-            AuthenticationExecutionModel.Requirement.DISABLED,
-            AuthenticationExecutionModel.Requirement.CONDITIONAL
-    };
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {

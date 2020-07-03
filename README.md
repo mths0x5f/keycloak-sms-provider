@@ -16,7 +16,7 @@ This was initially developed using 10.0.2 version of Keycloak as baseline, and I
 the default like Kerberos or LDAP. I may try to help you but I cannot guarantee.
 
 ## Thanks
-Some code written were inspired by these two projects: [keycloak-phone-authenticator](https://github.com/FX-HAO/keycloak-phone-authenticator)
+Some code written is based on existing ones in these two projects: [keycloak-phone-authenticator](https://github.com/FX-HAO/keycloak-phone-authenticator)
 and [keycloak-sms-authenticator](https://github.com/gwallet/keycloak-sms-authenticator). Certainly I would have many problems
 coding all those providers blindly. Thank you!
 
