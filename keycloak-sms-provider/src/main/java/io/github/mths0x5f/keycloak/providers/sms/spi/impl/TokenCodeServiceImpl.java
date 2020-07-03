@@ -135,15 +135,16 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
         user.setSingleAttribute("isPhoneNumberVerified", "true");
         user.setSingleAttribute("phoneNumber", phoneNumber);
-        validateProcess(tokenCode.getId());
+        validateProcess(tokenCode.getId(), user);
 
         cleanUpAction(user);
     }
 
     @Override
-    public void validateProcess(String tokenCodeId) {
+    public void validateProcess(String tokenCodeId, UserModel user) {
         TokenCode entity = getEntityManager().find(TokenCode.class, tokenCodeId);
         entity.setConfirmed(true);
+        entity.setByWhom(user.getId());
         getEntityManager().persist(entity);
     }
 

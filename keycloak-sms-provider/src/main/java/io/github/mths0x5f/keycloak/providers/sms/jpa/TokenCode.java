@@ -50,4 +50,7 @@ public class TokenCode {
 
     @Column(name = "CONFIRMED", nullable = false)
     private Boolean confirmed;
+
+    @Column(name = "BY_WHOM", nullable = true)
+    private String byWhom;
 }
