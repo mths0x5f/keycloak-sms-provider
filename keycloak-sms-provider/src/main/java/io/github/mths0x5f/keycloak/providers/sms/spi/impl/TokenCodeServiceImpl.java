@@ -130,10 +130,10 @@ public class TokenCodeServiceImpl implements TokenCodeService {
                 .stream().filter(u -> !u.getId().equals(user.getId()))
                 .forEach(u -> {
                     logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
-                    u.setSingleAttribute("isPhoneNumberVerified", "false");
+                    u.setSingleAttribute("phoneNumberVerified", "false");
                 });
 
-        user.setSingleAttribute("isPhoneNumberVerified", "true");
+        user.setSingleAttribute("phoneNumberVerified", "true");
         user.setSingleAttribute("phoneNumber", phoneNumber);
         validateProcess(tokenCode.getId(), user);
 

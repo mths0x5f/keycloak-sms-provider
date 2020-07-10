@@ -9,8 +9,8 @@ This is what you can do for now:
   + Check ownership of a phone number (Forms and HTTP API)
   + Use SMS as second factor in 2FA method (Browser flow)
   
-Two user attributes are going to be used by this provider: _isPhoneNumberVerified_ (bool) and _phoneNumber_ (str). Many
-users can have the same _phoneNumber_, but only one of them is getting _isPhoneNumberVerified_ = true at the end of a 
+Two user attributes are going to be used by this provider: _phoneNumberVerified_ (bool) and _phoneNumber_ (str). Many
+users can have the same _phoneNumber_, but only one of them is getting _phoneNumberVerified_ = true at the end of a 
 verification process. This accommodates the use case of pre-paid numbers that get recycled if inactive for too much time.
 
 ## Compatibility
